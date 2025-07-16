@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Cloud Identity Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Add Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+
+<body class="font-roboto text-lg m-0 p-0 bg-gray-50 text-gray-800">
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebarToggle" class="fixed top-0 left-0 p-4 bg-orange-500 text-white z-50 transition-transform duration-200 ease-out">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-200 ease-out z-40">
+        <div class="p-6">
+            <h2 class="text-2xl font-bold mb-6">Navigation</h2>
+            <nav class="space-y-4">
+                <a href="#aim" class="block text-gray-700 hover:text-orange-500 hover:underline">Aim/Goal of the project</a>
+                <a href="#identity-model" class="block text-gray-700 hover:text-orange-500 hover:underline">Identity Management Model</a>
+                <a href="#wallet-setup" class="block text-gray-700 hover:text-orange-500 hover:underline">Wallet Setup</a>
+                <a href="#cross-cloud-setup" class="block text-gray-700 hover:text-orange-500 hover:underline">Cloud Service Providers Setup</a>
+                <a href="#blockchain" class="block text-gray-700 hover:text-orange-500 hover:underline">Blockchain Setup</a>
+                <a href="#workload-example" class="block text-gray-700 hover:text-orange-500 hover:underline">workload Example</a>
+                <a href="#demo" class="block text-gray-700 hover:text-orange-500 hover:underline">Demo</a>
+                <a href="#Sponsors" class="block text-gray-700 hover:text-orange-500 hover:underline">Sponsors</a>
+                <a href="#UsedRes" class="block text-gray-700 hover:text-orange-500 hover:underline">Used Ressources</a>
+            </nav>
+        </div>
+    </aside>
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Main Content -->
+    <main class="ml-0 transition-all duration-200 ease-out pt-16">
+        <!-- Content Sections -->
+        <div class="max-w-4xl mx-auto px-2">
+            <section class="mb-8">
+                <h1 class="text-3xl font-bold text-center mb-4">Cross-Cloud Identity Management Wallet (XCId)</h1>
+            </section>
+            <section class="mb-8">
+                <h2 class="text-3xl font-bold text-center mb-4">Step by step guide on Cross-Cloud Authentication via OpenId Connect</h2>
+                <p class="text-lg leading-relaxed text-center">
+                    The XCId wallet is developed by the SIERA team from 
+                    <a href="https://www.irit.fr/en/home/" class="text-orange-500 hover:underline">IRIT Lab</a> 
+                    and 
+                    <a href="https://www.univ-tlse3.fr" class="text-orange-500 hover:underline">Toulouse University</a>, France.</br> 
+                    Mohamed Amine Ben Haj Salah, Romain Laborde, Daniele Canavese, Abdelmalek Benzekri, Mohamed Ali Kandi, and Afonso Ferreira                </p>
+            </section>
+
+            <section id="aim" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Aim/Goal of the project</h2>
+                <p class="text-lg leading-relaxed">
+                    Cross-cloud is an emerging strategy to run applications seamlessly across different Cloud Service Providers. Even though there are significant benefits such as scalability, compliance or vendor lock-in avoidance, 
+                    aspects of security interoperability — particularly in the realm of identity management — remains a significant challenge. 
+                    present a novel solution, called XCId, that addresses identity interoperability in cross-cloud environment without relying 
+                    on intermediaries or third-party brokers. Our approach follows the Self-Sovereign Identity principles to ensure a user-centric identity solution and is built upon existing and widely deployed protocols, allowing interoperability with current Cloud Service Providers technologies. The framework was tested on Amazon Web Service, Google Cloud platform and OwnCloud.
+                    The goal of this step by step guide is to establish a complete solution capable to authenticate users and workfloads to the Cloud Service Providers via a wallet that the admin/owner have the full rights and control on.
+                    To test this solution, a python script will try to download a file from each CSP by authenticating via the OIDC tokens issued by the XCId wallet.
+                </p>
+            </section>
+
+            <section id="identity-model" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Identity Management Model</h2>
+                <p class="text-lg leading-relaxed">
+                    Overview of the identity management architecture and flow across cloud services and blockchain technologies. 
+                    PKCE flow was used for the TRS API authentication and Token Exchange Standard flow for TRS to impersonate users(apps) to acquire valid access tokens for the CSPs.
+                    <div class="flex justify-center items-center space-x-16 mt-4">
+                    <img src="xcidpromax.png" alt="IdentityModel"  class="h-auto w-auto mb-4">
+                </div>
+                </p>
+            </section>
+
+            <section id="wallet-setup" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Wallet Setup</h2>
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold">a. Identity Provider - Keycloak</h3>
+                    <p class="text-lg leading-relaxed">
+                    Purpose : the identity provider is an important component of our XCId wallet.
+                    It is responsible for issuing OIDC tokens and for the authentication process to the wallet itself by protecting the TRS API.</br>
+                        <strong>Create a new realm :</strong> we'll call it the sieraMultiCloudOidc realm. This realm, contains one public OIDC client for the API (X-Cloud TRS) and one confidential OIDC client (per cloud service provider). To enable the standard token exchange, the OIDC clients (csp client) should be confidential to limit the exposure of theses clients, thus securing the tokens exchange<br>
+                        <strong>Create new users :</strong> one per wokflow/app wanting to access the wallet. Add the cspList attribute to the user with values like csp1OidcClientId, csp2OidcClientId, etc.<br>
+                        <strong>Create Client scopes :</strong> one for the cspList attribute and one the CSPs wallet audiences. These scopes will ensure that the OIDC tokens include the necessary attributes for the cross-cloud authentication process<br>
+                        Important info about token exchange : It allows a client to exchange an access token issued to one client (e.g., the TRS public client) for a new token issued to another called a target client (e.g., a CSP client), provided the original token's audience includes the target client's ID. This is a security feature that ensures that the token is only used by the intended client and not intercepted by other clients.
+                        <div class="mt-0">
+                            <h4 class="text-lg font-medium mb-2">After the first login, The app's access token should include the different CSPs audiences and the cspList attribute :</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-json">{
+    "exp": 1748441906,
+    "iat": 1748441606,
+    "jti": "trrtna:9b556ef9-24f4-4948-adb7-3356d69be291",
+    "iss": "https://XXXXXX/realms/sieramulticloudoidc",
+    "aud": [
+        "cognitoS3",
+        "OwnCloudOIDC",
+        "gcp",
+        "account"
+    ],
+    "sub": "8e09d085-9f3c-499b-bc37-9c5e7f077fb3",
+    "typ": "Bearer",
+    "azp": "trsAgentClient",
+    ...
+    "scope": "openid email cspList_scope profile",
+    "email_verified": true,
+    "name": "xcloud app",
+    "cspList": "cognitoS3,gcp,OwnCloudOIDC",
+    "preferred_username": "xcloudapp",
+    ...
+}</code></pre>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold">b. API : X-Cloud Token Retrieval Service</h3>
+                    <p class="text-lg leading-relaxed">The Token Retrieval service is an API responsible for communicating with the cross-cloud app and it acts as a middleware between the IdP and the external apps or users.<br>
+                        <div class="mt-0">
+                            <h4 class="text-lg font-medium mb-2">Create the API folder :</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash">mkdir my-api && cd my-api</code></pre>
+                            </div>
+                        </div>
+                        <div class="mt-0">
+                            <h4 class="text-lg font-medium mb-2">Initialize Node.js Project :</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash">npm init -y</code></pre>
+                            </div>
+                        </div>
+                        <div class="mt-0">
+                            <h4 class="text-lg font-medium mb-2">Install Express :</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash">npm install express</code></pre>
+                            </div>
+                        </div>
+                        <div class="mt-0">
+                            <h4 class="text-lg font-medium mb-2">Prepare your API file index.js :</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-javascript">/ /trs route protected by Keycloak
+app.get('/trs', keycloak.protect(), async (req, res, next) => {
+    try {
+        console.log('IN /TRS')
+        const login_token = req.headers.authorization.split(' ')[1];
+
+        cspAuthList = extractAttributeFromToken(login_token, "cspList").split(',').map(item => item.trim());
+        const csplist = req.query.csplist.split(',');
+
+        const kcUrl = 'https://XXXXXX/realms/sieramulticloudoidc';
+
+        console.log('Starting token retrieval...');
+        fetchCspTokens(csplist, kcUrl, login_token, res);
+
+
+    } catch (error) {
+        console.error('Error in /trs endpoint:', error);
+        res.status(500).json({ error: error.message });
+    }
+});</code></pre>
+                            </div>
+                        </div>
+                        <div class="mt-0">
+                            <h4 class="text-lg font-medium mb-2">Add the keycloak client adapter config to the directory (download it from the keycloak admin console) :</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash">cat keycloak_client.json
+{
+    "realm": "sieramulticloudoidc",
+    "auth-server-url": "https://XXXX/auth/",
+    "ssl-required": "external",
+    "resource": "trsAgentClient",
+    "public-client": true,
+    "confidential-port": 0
+    }
+                            </code></pre>
+                            </div>
+                        </div>
+                        <div class="mt-0">
+                            <h4 class="text-lg font-medium mb-2">Start the server (TRS) :</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash">node index.js</code></pre>
+                            </div>
+                        </div>
+                    </p>
+
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold">c. Wallet Cross-Cloud Deployment</h3>
+                    <p class="text-lg leading-relaxed">Now that the IdP and TRS are deployed, the next step would be to choose the deployement method of this wallet. 
+                        This work is still in progress. A true cross-cloud implementation, should consider deploying 
+                        keycloak (IdP) in a <a href="https://cyber.gouv.fr/secnumcloud-pour-les-fournisseurs-de-services-cloud" class="text-orange-500 hover:underline">SecNumCloud</a>-like 
+                        enclosion and the TRS could be deployed on another CSP that dosen't need a critical level of security like the IdP.<br>
+                        For testing purposes, the keycloak server is an online instance (free keycloak instance with https://www.cloud-iam.com) and a locally hosted TRS API.<br>
+                    </p>
+                </div>
+            </section>
+
+            <section id="cross-cloud-setup" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Cloud Service Providers Setup</h2>
+                <p class="text-lg leading-relaxed">
+                    This sections presents the needed steps to configure three different cloud service providers to work with 
+                    our cross-cloud identity management system. 
+                    Each provider has its own authentication
+                    but we'll integrate them all with our OIDC-based identity system. 
+                    This integration enables seamless access to resources across different clouds while 
+                    maintaining each provider's security requirements. We'll set up AWS, Google Cloud Platform, 
+                    and OwnCloud, each with their specific configurations for OIDC authentication and resource 
+                    access.
+                </p>
+                <p class="text-lg leading-relaxed mt-4">
+                    The setup process for each provider follows a similar pattern:
+                    <ul class="list-disc list-inside ml-6 mt-2">
+                        <li>Configure storage resources (buckets/containers)</li>
+                        <li>Set up OIDC authentication integration</li>
+                        <li>Configure access policies and permissions (roles)</li>
+                        <li>Test the integration with our identity system</li>
+                    </ul>
+                </p>
+            </br>
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold">a. Amazon Web Services</h3>
+                    <p class="text-lg leading-relaxed">
+                        To set up the AWS infrastructure for cross-cloud identity management, follow these steps:
+                    </p>
+                    <ol class="list-decimal list-inside space-y-4 mt-4">
+                        <li>
+                            <strong>Create an S3 bucket</strong> to store your files through the 
+                            <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html" class="text-orange-500 hover:underline">AWS S3 Console</a> 
+                            or using the AWS CLI. Configure appropriate bucket policies.
+                        </li>
+                        <li>
+                            <strong>Set up an OIDC Identity Provider</strong> in AWS IAM to allow your application to authenticate users through your Keycloak server. Follow the 
+                            <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html" class="text-orange-500 hover:underline">AWS documentation for adding an OIDC provider</a> 
+                            and configure it with your Keycloak server's OIDC endpoint and client credentials.
+                        </li>
+                        <li>
+                            <strong>Configure Amazon Cognito</strong> to handle the identity federation:
+                            <ul class="list-disc list-inside ml-6 mt-2 space-y-2">
+                                <li>Create a new Identity Pool in the 
+                                    <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/identity-pools.html" class="text-orange-500 hover:underline">Amazon Cognito Console</a>
+                                </li>
+                                <li>Configure the Identity Pool to use your OIDC provider for authentication</li>
+                                <li>Create an IAM role for authenticated users that will be assumed when users authenticate through Cognito. This could also be done in an advanced way by creating multiple roles and a policy dictating the role to lend based on the attributes in the OIDC token.</li>
+                                <li>Create and attach an IAM policy to this role that grants the necessary permissions to access your S3 bucket (including operations like <code class="bg-gray-100 px-1 rounded">s3:GetObject</code>, <code class="bg-gray-100 px-1 rounded">s3:PutObject</code>, and <code class="bg-gray-100 px-1 rounded">s3:ListBucket</code>)</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p class="text-lg leading-relaxed mt-4">
+                        For detailed step-by-step instructions, refer to these AWS documentation pages:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 mt-2">
+                        <li><a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html" class="text-orange-500 hover:underline">Creating an S3 Bucket</a></li>
+                        <li><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html" class="text-orange-500 hover:underline">Adding an OIDC Identity Provider</a></li>
+                        <li><a href="https://docs.aws.amazon.com/cognito/latest/developerguide/identity-pools.html" class="text-orange-500 hover:underline">Creating an Identity Pool</a></li>
+                        <li><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html" class="text-orange-500 hover:underline">Creating IAM Roles</a></li>
+                        <li><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_create.html" class="text-orange-500 hover:underline">Creating IAM Policies</a></li>
+                    </ul>
+                    <p class="text-lg leading-relaxed mt-4">
+                        This setup will allow your application to authenticate users through Keycloak and then use AWS Cognito to obtain temporary AWS credentials for accessing the S3 bucket securely.
+                    </p>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold">b. Google Cloud Platform</h3>
+                    <p class="text-lg leading-relaxed">
+                        To set up the Google Cloud Platform infrastructure for cross-cloud identity management, follow these steps:
+                    </p>
+                    <ol class="list-decimal list-inside space-y-4 mt-4">
+                        <li>
+                            <strong>Create a Cloud Storage bucket</strong> to store your files:
+                            <ul class="list-disc list-inside ml-6 mt-2 space-y-2">
+                                <li>Go to the 
+                                    <a href="https://console.cloud.google.com/storage/browser" class="text-orange-500 hover:underline">Cloud Storage Browser</a>
+                                </li>
+                                <li>Click "Create Bucket" and follow the setup wizard</li>
+                                <li>Choose a globally unique name for your bucket</li>
+                                <li>Select the appropriate storage class and location</li>
+                                <li>Configure access control settings:
+                                    <ul class="list-disc list-inside ml-6 mt-2 space-y-2">
+                                        <li>Set uniform bucket-level access</li>
+                                        <li>Set up appropriate IAM policies</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Add an Identity Provider</strong> in Google Cloud IAM:
+                            <ul class="list-disc list-inside ml-6 mt-2 space-y-2">
+                                <li>Navigate to the 
+                                    <a href="https://console.cloud.google.com/iam-admin/workload-identity-pools" class="text-orange-500 hover:underline">Workload Identity Federation page</a>
+                                </li>
+                                <li>Create a new Workload Identity Pool</li>
+                                <li>Configure the OIDC provider with your Keycloak server's OIDC endpoint and client credentials</li>
+                                <li>Set up attribute mapping to map Keycloak claims to Google Cloud attributes</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Create a Service Account</strong> that will be used by authenticated users:
+                            <ul class="list-disc list-inside ml-6 mt-2 space-y-2">
+                                <li>Go to the 
+                                    <a href="https://console.cloud.google.com/iam-admin/serviceaccounts" class="text-orange-500 hover:underline">Service Accounts page</a>
+                                </li>
+                                <li>Create a new service account with appropriate permissions</li>
+                                <li>Grant the service account access to Google Cloud Storage (roles/storage.objectViewer, roles/storage.objectCreator)</li>
+                                <li>Download the service account key. This key is a json file containing the filepath of the OIDC token. This is a necessary step to be able to use the service account in the workload. The "key" file stays always the same, but the value of the OIDC access token changes after each login (this sould be done by the app itself after receiving the OIDC tokens from TRS).</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Configure Workload Identity Federation</strong>:
+                            <ul class="list-disc list-inside ml-6 mt-2 space-y-2">
+                                <li>Create a Workload Identity Pool in the 
+                                    <a href="https://console.cloud.google.com/iam-admin/workload-identity-pools" class="text-orange-500 hover:underline">Workload Identity Federation console</a>
+                                </li>
+                                <li>Configure the pool to use your OIDC provider</li>
+                                <li>Set up attribute conditions to control which users can access which resources</li>
+                                <li>Create a service account impersonation configuration</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p class="text-lg leading-relaxed mt-4">
+                        For detailed step-by-step instructions, refer to these Google Cloud documentation pages:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 mt-2">
+                        <li><a href="https://cloud.google.com/storage/docs/creating-buckets" class="text-orange-500 hover:underline">Creating Cloud Storage Buckets</a></li>
+                        <li><a href="https://cloud.google.com/iam/docs/workload-identity-federation" class="text-orange-500 hover:underline">Workload Identity Federation Overview</a></li>
+                        <li><a href="https://cloud.google.com/iam/docs/configuring-workload-identity-federation" class="text-orange-500 hover:underline">Configuring Workload Identity Federation</a></li>
+                        <li><a href="https://cloud.google.com/iam/docs/creating-managing-service-accounts" class="text-orange-500 hover:underline">Creating and Managing Service Accounts</a></li>
+                        <li><a href="https://cloud.google.com/storage/docs/access-control/iam" class="text-orange-500 hover:underline">Cloud Storage IAM Permissions</a></li>
+                    </ul>
+                    <p class="text-lg leading-relaxed mt-4">
+                        This setup enables your application to authenticate users through Keycloak and then use Workload Identity Federation to obtain temporary Google Cloud credentials for accessing Cloud Storage securely. The service account will be impersonated by authenticated users based on the attributes in their OIDC tokens.
+                    </p>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold">c. OwnCloud & OIDC App</h3>
+                    <p class="text-lg leading-relaxed">
+                        To set up OwnCloud with OIDC authentication integration for cross-cloud identity management, follow these steps:
+                    </p>
+                    <ol class="list-decimal list-inside space-y-4 mt-4">
+                        <li>
+                            <strong>Install the OIDC App</strong> on OwnCloud through the 
+                            <a href="https://marketplace.owncloud.com/apps/openidconnect" class="text-orange-500 hover:underline">OwnCloud Marketplace</a>.
+                        </li>
+                        <li>
+                            <strong>Beware of this OIDC php bug</strong>, run this command to ensure the PKCE flow (bug explained <a href="https://github.com/jumbojett/OpenID-Connect-PHP/issues/453" class="text-orange-500 hover:underline">here</a>):
+                            <div class="relative mt-2">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash">occ config:system:set 'http.cookie.samesite' --value Lax</code></pre>
+                            </div>
+                        </li>
+                        <li>
+                            <strong>Configure the OIDC App</strong> using the OwnCloud CLI (occ):
+                            <ul class="list-disc list-inside ml-6 mt-2 space-y-2">
+                                <li>Access your OwnCloud server's command line</li>
+                                <li>Use the following configuration command:
+                                    <div class="relative mt-2">
+                                        <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                        <pre><code class="language-bash">occ config:app:set openidconnect openid-connect 
+    --value='{"provider-url":"http://XXXXXX/realms/sieramulticloudoidc",
+    "client-id":"OwnCloudClient",
+    "client-secret":"OwnCloudClientSecret",
+    "loginButtonName":"Login via SIERA OpenId Connect", 
+    "search-attribute":"preferred_username", 
+    "auto-provision":{"enabled":false}, 
+    "mode":"userid"}'</code></pre>
+                                    </div>
+                                </li>
+                                <li>Configuration parameters explained:
+                                    <ul class="list-disc list-inside ml-6 mt-2 space-y-2">
+                                        <li><code class="bg-gray-100 px-1 rounded">provider-url</code>: Your Keycloak server's OIDC endpoint</li>
+                                        <li><code class="bg-gray-100 px-1 rounded">client-id</code>: The OIDC client ID registered in Keycloak</li>
+                                        <li><code class="bg-gray-100 px-1 rounded">client-secret</code>: The client secret from Keycloak</li>
+                                        <li><code class="bg-gray-100 px-1 rounded">search-attribute</code>: The attribute used to identify users</li>
+                                        <li><code class="bg-gray-100 px-1 rounded">auto-provision</code>: Whether to automatically create users</li>
+                                        <li><code class="bg-gray-100 px-1 rounded">mode</code>: The user identification mode</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Configure OwnCloud Storage</strong>:
+                            <ul class="list-disc list-inside ml-6 mt-2 space-y-2">
+                                <li>OwnCloud acts like a private cloud where every user own a dedicated storage space. Therefore, the apps will login as a user (a human) and not as a workfload/workflow like AWS and GCP.</li>
+                                <li>Set up appropriate storage quotas for users</li>
+                                <li>Configure file sharing permissions</li>
+                                <li>Set up group policies if needed</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p class="text-lg leading-relaxed mt-4">
+                        For detailed step-by-step instructions, refer to these OwnCloud documentation pages:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 mt-2">
+                        <li><a href="https://doc.owncloud.com/server/next/admin_manual/configuration/user/user_auth_oauth.html" class="text-orange-500 hover:underline">OwnCloud OAuth2/OIDC Authentication</a></li>
+                        <li><a href="https://doc.owncloud.com/server/next/admin_manual/configuration/server/occ_command.html" class="text-orange-500 hover:underline">OwnCloud Command Line Tool</a></li>
+                        <li><a href="https://doc.owncloud.com/server/next/admin_manual/configuration/files/file_sharing_configuration.html" class="text-orange-500 hover:underline">File Sharing Configuration</a></li>
+                    </ul>
+                    <p class="text-lg leading-relaxed mt-4">
+                        This setup enables your application to authenticate users through Keycloak and access OwnCloud storage securely. 
+                    </p>
+                </div>
+            </section>
+
+            <section id="blockchain" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Blockchain and Hyperledger Indy Setup</h2>
+                <p class="text-lg leading-relaxed">
+                    Configuration and deployment of blockchain network nodes using Hyperledger Indy.
+                </p>
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold mb-4">Hyperledger Indy Setup Commands</h3>
+                    <div class="space-y-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-medium mb-2">1. Initial Setup</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash"># Install Docker from official website
+https://www.docker.com/products/docker-desktop
+
+# Clone Hyperledger Indy repository
+git clone https://github.com/hyperledger/indy-node.git
+
+# Build base image files
+cd indy-node/environment/docker/baseimage
+make
+
+# Navigate to pool directory
+cd ../pool</code></pre>
+                            </div>
+                            <p class="mt-2 text-gray-600">These commands set up the basic environment for Hyperledger Indy, including Docker installation and repository cloning.</p>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-medium mb-2">2. Pool and Client Setup (in two distinct terminals)</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash"># Start the pool (creates 4 nodes with IPs 10.0.0.2 to 10.0.0.5)
+./pool_start.sh
+
+# Start the Indy client (specify IP and pool name)
+./client_start.sh 10.0.0.6 pool-network</code></pre>
+                            </div>
+                            <p class="mt-2 text-gray-600">These commands initialize the Indy network pool and client. The pool consists of 4 validator nodes.</p>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-medium mb-2">3. Node and Client Terminal Setup</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash"># Terminal 1: Access Indy client
+docker exec -it indyclient /bin/bash
+
+# Terminal 2: Access node
+docker exec -it node1 /bin/bash</code></pre>
+                            </div>
+                            <p class="mt-2 text-gray-600">These commands open interactive shells for both the Indy client and a node in separate terminals.</p>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-medium mb-2">4. Pool Configuration</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash"># View pool transactions
+cat /var/lib/indy/sandbox/pool_transactions_genesis
+
+# Create pool configuration file
+cat > poolConf
+
+# Create pool with configuration
+pool create myPool gen_txn_file=/home/indy/poolConf
+
+# Connect to the pool
+pool connect myPool</code></pre>
+                            </div>
+                            <p class="mt-2 text-gray-600">These commands handle pool configuration, including viewing and creating pool transactions and establishing connections.</p>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-medium mb-2">5. Wallet and DID Management</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash"># Create a wallet for the cross-cloud environment admin/owner
+wallet create walletCloudAdmin key=walletCloudAdmin
+
+# Get Steward ownership (this is necessary as the blockchain is permissioned)
+did new seed=000000000000000000000000Steward1 metadata=st1 
+
+# List all the DIDs found in the wallet
+pool(pool4nodes):walletCloudAdmin:did(Th7...81Y):indy-cli-rs> did list
++------------------------+-------------------------+----------+
+| Did                    | Verkey                  | Metadata |
++------------------------+-------------------------+----------+
+| Th7MpTaRZVRYnPiabds81Y | ~7TYfekw4GUagBnBVCqPjiC | st1      |
++------------------------+-------------------------+----------+
+| PmcZnMkFuH14ckZ6WUVxuD | ~HoE6Xx43Q8VpyS6oUjdU72 | adminDID |
++------------------------+-------------------------+----------+
+Current did "Th7MpTaRZVRYnPiabds81Y"
+
+# Publish the previous DID with the TRUST_ANCHOR role (in order for it to be recognized on the blockchain)
+pool(pool4nodes):walletCloudAdmin:did(Th7...81Y):indy-cli-rs> ledger nym did=PmcZnMkFuH14ckZ6WUVxuD verkey=~HoE6Xx43Q8VpyS6oUjdU72 role=TRUST_ANCHOR
+Nym request has been sent to Ledger.
+Metadata:
++------------------------+-----------------+---------------------+---------------------+
+| From                   | Sequence Number | Request ID          | Transaction time    |
++------------------------+-----------------+---------------------+---------------------+
+| Th7MpTaRZVRYnPiabds81Y | 29              | 1737548928136646139 | 2025-01-22 12:28:48 |
++------------------------+-----------------+---------------------+---------------------+
+Data:
++------------------------+-------------------------+----------+
+| Did                    | Verkey                  | Role     |
++------------------------+-------------------------+----------+
+| PmcZnMkFuH14ckZ6WUVxuD | ~HoE6Xx43Q8VpyS6oUjdU72 | ENDORSER |
++------------------------+-------------------------+----------+</code></pre>
+                            </div>
+                            <p class="mt-2 text-gray-600">These commands manage the wallet and DIDs, including creation, listing, and selection of specific DIDs.</p>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-lg font-medium mb-2">6. Ledger Operations : Publishing the wallet URL on the blockchain via the DID document</h4>
+                            <div class="relative">
+                                <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <pre><code class="language-bash"># Select a DID
+pool(pool4nodes):walletCloudAdmin:indy-cli-rs> did use PmcZnMkFuH14ckZ6WUVxuD
+Did "PmcZnMkFuH14ckZ6WUVxuD" has been set as active
+
+# Add the link to the DID document
+pool(pool4nodes):walletCloudAdmin:did(Pmc...xuD):indy-cli-rs> ledger attrib did=PmcZnMkFuH14ckZ6WUVxuD raw={"TRSlink":{"url":"http://xxxx:3000/trs?csplist="}}
+Attrib request has been sent to Ledger.
+Metadata:
++------------------------+-----------------+---------------------+---------------------+
+| From                   | Sequence Number | Request ID          | Transaction time    |
++------------------------+-----------------+---------------------+---------------------+
+| PmcZnMkFuH14ckZ6WUVxuD | 31              | 1737624293852671048 | 2025-01-23 09:24:53 |
++------------------------+-----------------+---------------------+---------------------+
+Data:
++----------------------------------------------------------+
+| Raw value                                                |
++----------------------------------------------------------+
+| {"TRSlink":{"url":"http://xxxx:3000/trs?csplist="}}      |
++----------------------------------------------------------+
+
+# Verify by requesting the URL from the blockchain/Ledger
+pool(pool4nodes):walletxcloudapp:indy-cli-rs> ledger get-attrib did=PmcZnMkFuH14ckZ6WUVxuD raw=TRSlink
+Following ATTRIB has been received.
+Metadata:
++------------------------+-----------------+---------------------+---------------------+
+| Identifier             | Sequence Number | Request ID          | Transaction time    |
++------------------------+-----------------+---------------------+---------------------+
+| LibindyDid111111111111 | 31              | 1737624339222627678 | 2025-01-23 09:24:53 |
++------------------------+-----------------+---------------------+---------------------+
+Data:
++----------------------------------------------------------+
+| Data                                                     |
++----------------------------------------------------------+
+| {"TRSlink":{"url":"http://xxxx:3000/trs?csplist="}}      |
++----------------------------------------------------------+</code></pre>
+                            </div>
+                            <p class="mt-2 text-gray-600">These commands handle ledger operations, including publishing DIDs, creating schemas, and managing attributes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold mb-4">Application DID Implementation</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="relative">
+                            <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <pre><code class="language-python">import indy_vdr.ledger as indyledger
+from indy_vdr import Pool, open_pool
+
+#Function to get the TRS link from the blockchain
+async def getTRSlink(walletDID):
+    # Constants
+    GENESIS_FILE_PATH = "XXX"
+    pool = Pool
+
+    # Step 1: Open the pool
+    pool = await open_pool(transactions_path=GENESIS_FILE_PATH)
+
+    # Step 2: Query the attribute (GET_ATTRIB)
+    get_attrib_request = indyledger.build_get_attrib_request(None, walletDID, "TRSlink", None, None)
+    attrib_query_response = await pool.submit_request(get_attrib_request)
+    
+    # Step 3: Extract the URL from the response
+    goal=attrib_query_response['data']
+    # Find the start and end positions of the URL
+    start_pos = goal.find('"url":"') + len('"url":"')
+    end_pos = goal.find('"', start_pos)
+            
+    # Step 4: Close the pool
+    pool.close()
+
+    return goal[start_pos:end_pos]</code></pre>
+                        </div>
+                        <p class="mt-2 text-gray-600">This Python implementation demonstrates how to retrieve the TRS link from the blockchain using the Hyperledger Indy VDR library.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="workload-example" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Cross-Cloud Application/workload Example</h2>
+                <p class="text-lg leading-relaxed">
+                    This section presents an example of what a cross-cloud app could be. The code shown below is from an example app, where it authenticates with the IdP, gets multiple OIDC tokens and use them to download a specific file from the three CSPs.<br>
+                    <section class="mb-8">
+                        <h2 class="text-xl font-semibold mb-4">Function Reference</h2>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border border-gray-300">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="px-6 py-3 border-b text-left text-lg font-semibold w-[20%]">Function</th>
+                                        <th class="px-6 py-3 border-b text-left text-lg font-semibold">Parameters</th>
+                                        <th class="px-6 py-3 border-b text-left text-lg font-semibold">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="px-6 py-4 border-b font-mono w-[20%]">getTRSlink()</td>
+                                        <td class="px-6 py-4 border-b font-mono">walletDID: str</td>
+                                        <td class="px-6 py-4 border-b">Retrieves the TRS (Token Retrieval Service) URL from the blockchain. Connects to the Hyperledger Indy pool, queries the wallet's TRSlink attribute, and returns the URL.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 border-b font-mono w-[20%]">extract_access_token()</td>
+                                        <td class="px-6 py-4 border-b font-mono">json_str: str, key: str</td>
+                                        <td class="px-6 py-4 border-b">Extracts an OIDC token from a JSON response for a specific CSP. Parses the JSON string and returns the access token for the specified key.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 border-b font-mono w-[20%]">extract_field_token()</td>
+                                        <td class="px-6 py-4 border-b font-mono">access_token: str, field_name: str</td>
+                                        <td class="px-6 py-4 border-b">Extracts a specific field from a JWT token payload. Decodes the base64 payload and returns the requested field value.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 border-b font-mono w-[20%]">get_trsToken_pkce()</td>
+                                        <td class="px-6 py-4 border-b font-mono">keycloak_url: str, client_id: str, redirect_uri: str</td>
+                                        <td class="px-6 py-4 border-b">Gets OIDC token from IDP using PKCE flow. Implements the OAuth2 PKCE authentication flow with Keycloak, including code verifier/challenge generation and token exchange.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 border-b font-mono w-[20%]">get_tokens_trs()</td>
+                                        <td class="px-6 py-4 border-b font-mono">keycloak_url: str, csplist: str</td>
+                                        <td class="px-6 py-4 border-b">Gets tokens from the Token Retrieval Service for all CSPs. First gets an IDP token, then uses it to request CSP-specific tokens.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 border-b font-mono w-[20%]">download_file_oc()</td>
+                                        <td class="px-6 py-4 border-b font-mono">access_token: str, file_url_oc: str, file_destination: str</td>
+                                        <td class="px-6 py-4 border-b">Downloads a file from OwnCloud using OIDC token. Makes an authenticated request to OwnCloud's WebDAV API and saves the file locally.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 border-b font-mono w-[20%]">download_file_gcp()</td>
+                                        <td class="px-6 py-4 border-b font-mono">token: str, bucket_name: str, source_blob_name: str, destination_file_name: str</td>
+                                        <td class="px-6 py-4 border-b">Downloads a file from Google Cloud Storage using OIDC token. Uses Google Cloud Storage client library with token-based authentication.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 border-b font-mono w-[20%]">download_file_aws()</td>
+                                        <td class="px-6 py-4 border-b font-mono">JWToken: str</td>
+                                        <td class="px-6 py-4 border-b">Downloads a file from AWS S3 using OIDC token and Cognito. Exchanges OIDC token for AWS credentials via Cognito Identity Pool and downloads the file.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-2">Function Call Flow:</h3>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li>Main execution starts with <code class="bg-gray-100 px-1 rounded">get_tokens_from_trs()</code></li>
+                                <li><code class="bg-gray-100 px-1 rounded">get_tokens_from_trs()</code> calls <code class="bg-gray-100 px-1 rounded">get_trsAgent_token_from_idp()</code> for authentication</li>
+                                <li>For each CSP in the response:
+                                    <ul class="list-disc list-inside ml-6 mt-2">
+                                        <li>Extract token fields using <code class="bg-gray-100 px-1 rounded">extract_field_from_token()</code></li>
+                                        <li>Call appropriate download function based on CSP type:
+                                            <ul class="list-disc list-inside ml-6 mt-2">
+                                                <li><code class="bg-gray-100 px-1 rounded">download_file_oc()</code> for OwnCloud</li>
+                                                <li><code class="bg-gray-100 px-1 rounded">download_file_gcp()</code> for Google Cloud</li>
+                                                <li><code class="bg-gray-100 px-1 rounded">download_file_aws()</code> for AWS</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                    </section>
+                    
+                    
+                </p>
+                <div class="mt-4">
+                    <h3 class="text-xl font-semibold mb-2">Python Implementation Example:</h3>
+                    <div class="relative">
+                        <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <pre><code class="language-python">#Interactive input
+csplist = input("Enter the wished CSPs to visit : ")
+file_name = input("Enter the file name : ")
+
+#DID Conf
+walletdid = input("Enter XCID Wallet DID : ")
+api_url = asyncio.run(getTRSlink(walletdid))
+
+# Initialize a session object
+session = requests.Session()
+keycloak_url = "https://xxxx.com/auth/realms/sieramulticloudoidc"
+client_id = "trsAgentClient"
+
+# OwnCloud Configuration
+oc_url = 'http://xxxx:8080/'
+oc_file_path = 'testing/pdf-exemple.pdf'
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+oc_file_destination = f"OC_{timestamp}_{os.path.basename(oc_file_path)}"  # Destination with timestamp
+
+
+# Call the function
+print(f'{Fore.YELLOW}Getting Token from TRS{Style.RESET_ALL}')
+credentials = get_tokens_from_trs(keycloak_url, csplist)
+
+# Parse JSON string into dictionary if it's not already a dictionary
+if isinstance(credentials, str):
+    try:
+        credentials = json.loads(credentials)
+    except json.JSONDecodeError as e:
+        print(f"{Fore.RED}Error parsing credentials JSON: {str(e)}{Style.RESET_ALL}")
+        exit(1)
+
+print(f'{Fore.GREEN}GOT Token(s) from TRS{Style.RESET_ALL}')
+
+print(f'{Fore.YELLOW}Processing tokens for all CSPs{Style.RESET_ALL}')
+for csp_name, csp_data in credentials.items():
+    print(f'\n{Fore.YELLOW}Processing CSP: {csp_name}{Style.RESET_ALL}')
+    
+    # Extract access token for current CSP
+    access_token = csp_data.get('access_token')
+    if not access_token:
+        print(f'{Fore.RED}Failed to get access token for {csp_name}, skipping...{Style.RESET_ALL}')
+        continue
+        
+    print(f'{Fore.GREEN}Got access token for {csp_name}{Style.RESET_ALL}')
+
+    # Extract and print token information
+    preferred_username = extract_field_from_token(access_token, "preferred_username")
+    print(f"{Fore.YELLOW}Preferred Username From Token: {Style.RESET_ALL}{preferred_username}")
+
+    audience = extract_field_from_token(access_token, "aud")
+    print(f"{Fore.YELLOW}Audience: {Style.RESET_ALL}{audience}")
+
+    azp = extract_field_from_token(access_token, "azp")
+    print(f"{Fore.YELLOW}azp: {Style.RESET_ALL}{azp}")
+
+    scope = extract_field_from_token(access_token, "scope")
+    print(f"{Fore.YELLOW}scope: {Style.RESET_ALL}{scope}")
+
+    # If this is OwnCloud, download the file
+    if csp_name == "OwnCloudOIDC":
+        file_full_url = f"{oc_url}remote.php/webdav/{file_name}"
+        download_file_oc(access_token, file_full_url, oc_file_destination)
+
+    if csp_name == "cognitoS3":
+        # File name in the S3 bucket
+        file_destination = '[' + os.path.splitext(os.path.basename(__file__))[0] + ']' + file_name
+
+        #AWS Configuration
+        aws_region = 'eu-west-3'   # AWS Region
+        cognito_identity_pool_id = 'eu-west-3:xxxx' # Cognito Identity Pool ID
+        s3_bucket_name = 'bucketucv1'  # S3 Bucket Name
+        download_file_aws(access_token)
+
+    if csp_name == "gcp":
+        # Google Cloud Storage Configuration
+        bucket_name = 'bucketucv1'  # Name of the bucket in Google Cloud Storage # OMMITED FOR CONFIDENTIALITY
+        file_destination = '[' + os.path.splitext(os.path.basename(__file__))[0] + ']' + file_name
+        download_file_gcp(access_token, bucket_name, file_name, file_destination)
+
+print(f'\n{Fore.GREEN}Finished processing all CSPs{Style.RESET_ALL}')
+exit(0)</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="demo" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Demo / Terminal Output</h2>
+                <p class="text-lg leading-relaxed">
+                        <div class="relative">
+                            <button class="copy-btn absolute top-2 right-2 p-2 text-gray-400 hover:text-orange-500 transition-colors">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <pre><code class="language-bash">Enter the wished CSPs to visit : cognitoS3,gcp,OwnCloudOIDC
+Enter the file name : sujet.pdf
+Enter XCID Wallet DID : PmcZnMkFuH14ckZ6WUVxuD
+
+Getting Token from TRS
+GOT Token(s) from TRS
+Processing tokens for all CSPs
+
+Processing CSP: cognitoS3
+Got access token for cognitoS3
+preferred_username: xcloudapp
+aud: ['cognitoS3', 'account']
+azp: cognitoS3
+scope: openid email profile
+File '[XCloudApp_Impersonate_PKCE]sujet.pdf' successfully downloaded from AWS S3.
+
+Processing CSP: gcp
+Got access token for gcp
+preferred_username: xcloudapp
+aud: ['gcp', 'account']
+azp: gcp
+scope: openid email profile
+File [XCloudApp_Impersonate_PKCE]sujet.pdf successfully downloaded from GCP.
+
+Processing CSP: OwnCloudOIDC
+Got access token for OwnCloudOIDC
+preferred_username: xcloudapp
+aud: account
+azp: OwnCloudOIDC
+scope: openid email profile
+Begin download.
+File [XCloudApp_Impersonate_PKCE]sujet.pdf successfully downloaded.
+
+Finished processing all CSPs</code></pre>
+                        </div>
+                    Terminal logs and outputs demonstrating successful deployments and correct authentication when downloading files from the CSPs.
+                </p>
+            </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- End of content -->
+    <!-- Logos only -->
+            <section id="Sponsors" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Sponsors</h2>
+                <p class="text-lg leading-relaxed">
+                    <div class="mt-8 text-center">
+                        <p class="text-lg leading-relaxed">
+                            This project is supported by the France 2030 ANR project ANR-23-PECL-0009 <a href="https://www.pepr-cloud.fr/" class="text-orange-500 hover:underline font-semibold">TRUSTINCloudS</a>, CNRS EU-CHECK and the European research
+                                project Horizon Europe DUCA (GA 101086308).
+                        </p>
+                        <div class="flex justify-center items-center space-x-8 mt-4">
+                            <img src="irit.png" alt="Logo 1" class="h-40 w-auto">
+                            <img src="ut3.svg" alt="Logo 2" class="h-40 w-auto">
+                            <img src="pepr.png" alt="Logo 3" class="h-40 w-auto">
+                        </div>
+                    </div>
+                </p>
+            </section>
+
+            <section id="UsedRes" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Used Resources</h2>
+                <div class="space-y-8 mt-4">
+                    <div class="flex flex-col items-center">
+                        <img src="aws.png" alt="AWS" class="h-32 w-auto mb-2">
+                        <p class="text-lg">Amazon Web Services</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <img src="gcp.svg" alt="GCP" class="h-24 w-auto mb-2">
+                        <p class="text-lg">Google Cloud Platform</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <img src="owncloud.png" alt="OwnCloud" class="h-32 w-auto mb-2">
+                        <p class="text-lg">OwnCloud</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <img src="keycloak.png" alt="Keycloak" class="h-20 w-auto mb-2">
+                        <p class="text-lg">Keycloak</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <img src="indy.png" alt="Hyperledger Indy" class="h-32 w-auto mb-2">
+                        <p class="text-xl font-semibold">Hyperledger Indy</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <img src="aries.png" alt="Hyperledger Aries" class="h-48 w-auto mb-2">
+                        <p class="text-lg">Hyperledger Indy</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <img src="cloudiam.svg" alt="Cloud IAM" class="h-64 w-auto mb-2">
+                        <p class="text-lg">Cloud IAM</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t mt-12">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+                <p>Mohamed Amine BEN HAJ SALAH</p>
+                <p>
+                    <a href="mailto:mohamed.ben-haj-salah@irit.fr" class="text-orange-500 hover:underline">Contact : mohamed.ben-haj-salah@irit.fr</a>
+                </p>
+                <p>Last updated 06/2025</p>
+                <div class="flex justify-center items-center space-x-8 mt-4">
+                    <img src="irit.png" alt="Logo 1" class="h-8 w-auto">
+                    <img src="ut3.svg" alt="Logo 2" class="h-8 w-auto">
+                    <img src="pepr.png" alt="Logo 3" class="h-8 w-auto">
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html> 
